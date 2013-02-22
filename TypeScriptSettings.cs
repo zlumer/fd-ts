@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing.Design;
 using System.Windows.Forms.Design;
 using System.ComponentModel;
 using PluginCore.Localization;
-using ProjectManager.Projects.Haxe;
 using PluginCore;
 
 namespace TypeScriptContext

@@ -1,7 +1,5 @@
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 using PluginCore.Managers;
@@ -12,10 +10,6 @@ using PluginCore.Controls;
 using PluginCore.Helpers;
 using PluginCore;
 using ASCompletion.Completion;
-using System.Collections;
-using System.Windows.Forms;
-using ProjectManager.Projects;
-using ProjectManager.Projects.Generic;
 using AS3Context;
 
 namespace TypeScriptContext
