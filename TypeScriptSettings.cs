@@ -189,28 +189,35 @@ namespace TypeScriptContext
 
         #endregion
 
-        #region haXe specific members
-
-        //[field: NonSerialized]
-        //public event CompletionModeChangedEventHandler CompletionModeChanged;
+        #region TypeScript specific members
 
         const string DEFAULT_TSS_PATH = "";
+        const string DEFAULT_NODE_PATH = "node.exe";
+
         const bool DEFAULT_DISABLEMIXEDCOMPLETION = false;
         const bool DEFAULT_DISABLECOMPLETIONONDEMAND = true;
-        const bool DEFAULT_EXPORTHXML = false;
 
-        private int flashVersion = 10;
         private string tssPath = DEFAULT_TSS_PATH;
+        private string nodePath = DEFAULT_NODE_PATH;
+
         private bool disableMixedCompletion = DEFAULT_DISABLEMIXEDCOMPLETION;
         private bool disableCompletionOnDemand = DEFAULT_DISABLECOMPLETIONONDEMAND;
-        private bool exportHXML = DEFAULT_EXPORTHXML;
 
         [DisplayName("TSS Path")]
         [LocalizedCategory("ASCompletion.Category.Language"), LocalizedDescription("TypeScriptContext.Description.TSSPath"), DefaultValue(DEFAULT_TSS_PATH)]
+        [Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
         public string TSSPath
         {
             get { return tssPath; }
             set { tssPath = value; }
+        }
+        [DisplayName("Node.js Path")]
+        [LocalizedCategory("ASCompletion.Category.Language"), LocalizedDescription("TypeScriptContext.Description.NodePath"), DefaultValue(DEFAULT_NODE_PATH)]
+        [Editor(typeof(FileNameEditor), typeof(UITypeEditor))]
+        public string NodePath
+        {
+            get { return nodePath; }
+            set { nodePath = value; }
         }
 
         [DisplayName("Disable Mixed Completion")]

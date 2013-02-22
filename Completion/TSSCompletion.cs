@@ -8,12 +8,9 @@ namespace TypeScriptContext
 {
     class TSSCompletion
     {
-        public static string nodePath = "node.exe";
-        //public static string tssPath = "C:/dev/TS-JSFL-Bindings/external/typescript-tools.git/bin/tss.js";
-
         private Process tssProcess;
 
-        public void Init(string tssPath, string tsSourcePath)
+        public void Init(string nodePath, string tssPath, string tsSourcePath)
         {
             tssProcess = new Process();
             tssProcess.StartInfo.FileName = nodePath;
