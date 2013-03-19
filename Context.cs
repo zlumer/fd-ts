@@ -522,55 +522,21 @@ namespace TypeScriptContext
                 val == "trace")
                 return null;
 
-            TypeScriptCompletion hc = new TypeScriptCompletion(sci, expression.Position + 1, completionModeHandler);
-            var al = hc.getList();
+            TypeScriptCompletion hc = new TypeScriptCompletion(sci, expression.Position - 1, completionModeHandler);
+            member.Name = name;
+            member.Flags = FlagType.Function;
+            member.Access = Visibility.Public;
+            var t = hc.getSymbolType();
 
-            if (al.Length > 0)
+            if (t == "any" || t.StartsWith("TSS command"))
             {
-                member.Name = name;
-                member.Flags = FlagType.Function;
-                member.Access = Visibility.Public;
-                member.Parameters = new List<MemberModel>();
-
-                populateFunctionMemberModel(member, al[0].type);
-            }
-
-            /*
-             * ArrayList al = hc.getList();
-            if (al == null || al.Count == 0)
-                return null; // haxe.exe not found
-
-            string outputType = al[0].ToString();
-
-            if (outputType == "type" )
-            {
-                member.Name = name;
-                member.Flags = FlagType.Function;
-                member.Access = Visibility.Public;
-
-                string type = al[1].ToString();
-
-                
-
-                // Function's arguments
-                member.Parameters = new List<MemberModel>();
-                int j = 0;
-                while (j < types.Length - 1)
-                {
-                    MemberModel param = new MemberModel(types.GetValue(j).ToString(), "", FlagType.ParameterVar, Visibility.Public);
-                    member.Parameters.Add(param);
-                    j++;
-                }
-                // Function's return type
-                member.Type = types.GetValue(types.Length - 1).ToString();
-            }
-            else if ( outputType == "error" )
-            {
-                string err = al[1].ToString();
-                sci.CallTipShow(sci.CurrentPos, err);
+                sci.CallTipShow(sci.CurrentPos, t);
                 sci.CharAdded += new ScintillaNet.CharAddedHandler(removeTip);
             }
-             */
+            else
+            {
+                populateFunctionMemberModel(member, t);
+            }
             
             return member;
         }

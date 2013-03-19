@@ -7,6 +7,9 @@ namespace TypeScriptContext
     internal class TypeScriptCompletion
     {
         private readonly int position;
+        private readonly int line;
+        private readonly int pos;
+        private readonly string filename;
         private readonly TSSCompletion comp;
         private readonly ScintillaControl sci;
 
@@ -15,16 +18,28 @@ namespace TypeScriptContext
             this.sci = sci;
             this.position = position;
             this.comp = handler;
+            
+            line = sci.LineFromPosition(position) + 1;
+            pos = position - sci.PositionFromLine(line - 1) + 1;
+            filename = PluginBase.MainForm.CurrentDocument.FileName.Replace("\\", "/");
 
-            comp.Update(new List<string>(sci.Text.Split('\n')), PluginBase.MainForm.CurrentDocument.FileName.Replace("\\", "/"));
+            comp.Update(new List<string>(sci.Text.Split('\n')), filename);
         }
 
         public TSSCompletionEntry[] getList()
         {
-            var line = sci.LineFromPosition(position);
-            var pos = position - sci.PositionFromLine(line);
-            TSSCompletionInfo info = comp.GetCompletions(true, line + 1, pos + 1, PluginBase.MainForm.CurrentDocument.FileName.Replace("\\", "/"));
+            TSSCompletionInfo info = comp.GetCompletions(true, line, pos, filename);
             return info.entries;
+        }
+        public TSSDefinitionResponse getDefinition()
+        {
+            TSSDefinitionResponse r = comp.GetDefinition(line, pos, filename);
+            return r;
+        }
+        public string getSymbolType()
+        {
+            var s = comp.GetType(line, pos, filename);
+            return s;
         }
     }
 }
