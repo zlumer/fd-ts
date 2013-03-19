@@ -140,6 +140,10 @@ namespace TypeScriptContext
                     if (contextInstance != null)
                         contextInstance.OnFileSwitch();
                     break;
+                case EventType.FileOpen:
+                    if (contextInstance != null)
+                        contextInstance.OnFileSwitch();
+                    break;
                 case EventType.FileSave:
                     contextInstance.completionModeHandler.Reload();
                     break;

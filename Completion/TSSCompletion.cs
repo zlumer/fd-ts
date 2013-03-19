@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Newtonsoft.Json;
@@ -13,7 +14,7 @@ namespace TypeScriptContext
         {
             tssProcess = new Process();
             tssProcess.StartInfo.FileName = nodePath;
-            tssProcess.StartInfo.Arguments = tssPath + " " + tsSourcePath;
+            tssProcess.StartInfo.Arguments = tssPath + " \"" + Path.GetFullPath(tsSourcePath) + "\"";
             tssProcess.StartInfo.UseShellExecute = false;
             tssProcess.StartInfo.RedirectStandardInput = true;
             tssProcess.StartInfo.RedirectStandardOutput = true;
