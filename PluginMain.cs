@@ -141,8 +141,9 @@ namespace TypeScriptContext
                         contextInstance.OnFileSwitch();
                     break;
                 case EventType.FileOpen:
+                    var te = e as TextEvent;
                     if (contextInstance != null)
-                        contextInstance.OnFileSwitch();
+                        contextInstance.OnFileSwitch(te.Value);
                     break;
                 case EventType.FileSave:
                     contextInstance.completionModeHandler.Reload();
@@ -170,7 +171,7 @@ namespace TypeScriptContext
         /// </summary>
         public void AddEventHandlers()
         {
-            EventManager.AddEventHandler(this, EventType.UIStarted | EventType.Command | EventType.FileSwitch | EventType.FileSave);
+            EventManager.AddEventHandler(this, EventType.UIStarted | EventType.Command | EventType.FileSwitch | EventType.FileSave | EventType.FileOpen);
         }
 
         /// <summary>

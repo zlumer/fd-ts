@@ -380,21 +380,26 @@ namespace TypeScriptContext
         #region Custom code completion
 
         internal TSSCompletion completionModeHandler;
-        private Dictionary<string, TypeScriptCompletion> handlers;
+        private Dictionary<string, TSSCompletion> handlers;
 
         /// <summary>
         /// Handles file switch
         /// </summary>
+        internal void OnFileSwitch(string filename)
+        {
+            if (handlers == null)
+                handlers = new Dictionary<string, TSSCompletion>();
+
+            if (!handlers.ContainsKey(filename))
+            {
+                handlers[filename] = new TSSCompletion();
+                handlers[filename].Init(hxsettings.NodePath, hxsettings.TSSPath, filename);
+            }
+            completionModeHandler = handlers[filename];
+        }
         internal void OnFileSwitch()
         {
-            if (completionModeHandler != null)
-            {
-                completionModeHandler.Finish();
-                completionModeHandler = null;
-            }
-
-            completionModeHandler = new TSSCompletion();
-            completionModeHandler.Init(hxsettings.NodePath, hxsettings.TSSPath, PluginBase.MainForm.CurrentDocument.FileName);
+            OnFileSwitch(PluginBase.MainForm.CurrentDocument.FileName);
         }
 
         /// <summary>
