@@ -23,7 +23,7 @@ namespace TypeScriptContext
             pos = position - sci.PositionFromLine(line - 1) + 1;
             filename = PluginBase.MainForm.CurrentDocument.FileName.Replace("\\", "/");
 
-            comp.Update(new List<string>(sci.Text.Split('\n')), filename);
+            comp.Update(new List<string>(sci.Text.Replace("\r\n", "\n").Split('\n')), filename);
         }
 
         public TSSCompletionEntry[] getList()
