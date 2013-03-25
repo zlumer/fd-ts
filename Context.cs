@@ -288,82 +288,6 @@ namespace TypeScriptContext
         }
 
         /// <summary>
-        /// Check if a type is already in the file's imports
-        /// Throws an Exception if the type name is ambiguous 
-        /// (ie. same name as an existing import located in another package)
-        /// </summary>
-        /// <param name="member">Element to search in imports</param>
-        /// <param name="atLine">Position in the file</param>
-        public override bool IsImported(MemberModel member, int atLine)
-        {
-            int p = member.Name.IndexOf('#');
-            if (p > 0)
-            {
-                member = member.Clone() as MemberModel;
-                member.Name = member.Name.Substring(0, p);
-            }
-
-            FileModel cFile = ASContext.Context.CurrentModel;
-            string fullName = member.Type;
-            string name = member.Name;
-            int lineMin = (ASContext.Context.InPrivateSection) ? cFile.PrivateSectionIndex : 0;
-            int lineMax = atLine;
-            foreach (MemberModel import in cFile.Imports)
-            {
-                if (import.LineFrom >= lineMin && import.LineFrom <= lineMax && import.Name == name)
-                {
-                    if (import.Type != fullName) throw new Exception(TextHelper.GetString("Info.AmbiguousType"));
-                    return true;
-                }
-                else if (import.Name == "*" && import.Type.Replace("*", name) == fullName)
-                    return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Prepare haXe intrinsic known vars/methods/classes
-        /// </summary>
-        protected override void InitTopLevelElements()
-        {
-            string filename = "toplevel.hx";
-            topLevel = new FileModel(filename);
-
-            // search top-level declaration
-            foreach (PathModel aPath in classPath)
-                if (File.Exists(Path.Combine(aPath.Path, filename)))
-                {
-                    filename = Path.Combine(aPath.Path, filename);
-                    topLevel = GetCachedFileModel(filename);
-                    break;
-                }
-
-            if (File.Exists(filename))
-            {
-                // copy declarations as file-level
-                ClassModel tlClass = topLevel.GetPublicClass();
-                if (!tlClass.IsVoid())
-                {
-                    topLevel.Members = tlClass.Members;
-                    tlClass.Members = null;
-                    topLevel.Classes = new List<ClassModel>();
-                }
-            }
-            // not found
-            else
-            {
-                //ErrorHandler.ShowInfo("Top-level elements class not found. Please check your Program Settings.");
-            }
-
-            topLevel.Members.Add(new MemberModel("this", "", FlagType.Variable, Visibility.Public));
-            topLevel.Members.Add(new MemberModel("super", "", FlagType.Variable, Visibility.Public));
-            //topLevel.Members.Add(new MemberModel("Void", "", FlagType.Intrinsic, Visibility.Public));
-            topLevel.Members.Sort();
-            foreach (MemberModel member in topLevel.Members)
-                member.Flags |= FlagType.Intrinsic;
-        }
-
-        /// <summary>
         /// Retrieves a package content
         /// </summary>
         /// <param name="name">Package path</param>
@@ -371,8 +295,6 @@ namespace TypeScriptContext
         /// <returns>Package folders and types</returns>
         public override FileModel ResolvePackage(string name, bool lazyMode)
         {
-            if ((settings.LazyClasspathExploration || lazyMode) && majorVersion >= 9 && name == "flash") 
-                name = "flash9";
             return base.ResolvePackage(name, lazyMode);
         }
         #endregion
@@ -438,6 +360,7 @@ namespace TypeScriptContext
                 member.Name = e.name;
                 member.Access = Visibility.Public;
                 member.Flags = flag;
+                member.Comments = e.docComment;
 
                 var type = e.type;
                 if (isMethod)
@@ -533,7 +456,7 @@ namespace TypeScriptContext
             member.Access = Visibility.Public;
             var t = hc.getSymbolType();
 
-            if (t == "any" || t.StartsWith("TSS command"))
+            if (t == "any")
             {
                 sci.CallTipShow(sci.CurrentPos, t);
                 sci.CharAdded += new ScintillaNet.CharAddedHandler(removeTip);
@@ -563,203 +486,6 @@ namespace TypeScriptContext
         public override string GetCompilerPath()
         {
             return hxsettings.GetDefaultSDK().Path;
-        }
-
-        /*
-        /// <summary>
-        /// Check current file's syntax
-        /// </summary>
-        public override void CheckSyntax()
-        {
-            EventManager.DispatchEvent(this, new NotifyEvent(EventType.ProcessStart));
-            TypeScriptCompletion hc = new TypeScriptCompletion(ASContext.CurSciControl, 0, completionModeHandler);
-            ArrayList result = hc.getList();
-            if (result.Count == 0 || (string)result[0] != "error")
-            {
-                EventManager.DispatchEvent(this, new TextEvent(EventType.ProcessEnd, "Done(0)"));
-                return;
-            }
-            foreach (string line in result)
-            {
-                if (line != "error") TraceManager.Add(line);
-            }
-            EventManager.DispatchEvent(this, new TextEvent(EventType.ProcessEnd, "Done(1)"));
-        }*/
-
-        /// <summary>
-        /// Run haXe compiler in the current class's base folder with current classpath
-        /// </summary>
-        /// <param name="append">Additional comiler switches</param>
-        public override void RunCMD(string append)
-        {
-            if (!IsFileValid || !File.Exists(CurrentFile))
-                return;
-
-            string haxePath = PathHelper.ResolvePath(hxsettings.GetDefaultSDK().Path);
-            if (!Directory.Exists(haxePath) && !File.Exists(haxePath))
-            {
-                ErrorManager.ShowInfo(TextHelper.GetString("Info.InvalidHaXePath"));
-                return;
-            }
-
-            SetStatusText(settings.CheckSyntaxRunning);
-
-            try
-            {
-                // save modified files if needed
-                if (outputFile != null) MainForm.CallCommand("SaveAllModified", null);
-                else MainForm.CallCommand("SaveAllModified", ".hx");
-
-                // change current directory
-                string currentPath = System.IO.Directory.GetCurrentDirectory();
-                string filePath = (temporaryPath == null) ? Path.GetDirectoryName(cFile.FileName) : temporaryPath;
-                filePath = NormalizePath(filePath);
-                System.IO.Directory.SetCurrentDirectory(filePath);
-                
-                // prepare command
-                string command = haxePath;
-                if (Path.GetExtension(command) == "") command = Path.Combine(command, "haxe.exe");
-
-                command += ";";
-                if (cFile.Package.Length > 0) command += cFile.Package+".";
-                string cname = cFile.GetPublicClass().Name;
-                if (cname.IndexOf('<') > 0) cname = cname.Substring(0, cname.IndexOf('<'));
-                command += cname;
-
-                // classpathes
-                string hxPath = PathHelper.ResolvePath(hxsettings.GetDefaultSDK().Path);
-                foreach (PathModel aPath in classPath)
-                    if (aPath.Path != temporaryPath
-                        && !aPath.Path.StartsWith(hxPath, StringComparison.OrdinalIgnoreCase))
-                        command += " -cp \"" + aPath.Path.TrimEnd('\\') + "\"";
-                command = command.Replace(filePath, "");
-
-                // run
-                MainForm.CallCommand("RunProcessCaptured", command + " " + append);
-                // restaure current directory
-                if (System.IO.Directory.GetCurrentDirectory() == filePath)
-                    System.IO.Directory.SetCurrentDirectory(currentPath);
-            }
-            catch (Exception ex)
-            {
-                ErrorManager.ShowError(ex);
-            }
-        }
-
-        /// <summary>
-        /// Calls RunCMD with additional parameters taken from the classes @haxe doc tag
-        /// </summary>
-        public override bool BuildCMD(bool failSilently)
-        {
-            if (!File.Exists(CurrentFile))
-                return false;
-            // check if @haxe is defined
-            Match mCmd = null;
-            ClassModel cClass = cFile.GetPublicClass();
-            if (IsFileValid)
-            {
-                if (cFile.Comments != null)
-                    mCmd = re_CMD_BuildCommand.Match(cFile.Comments);
-                if ((mCmd == null || !mCmd.Success) && cClass.Comments != null)
-                    mCmd = re_CMD_BuildCommand.Match(cClass.Comments);
-            }
-
-            if (mCmd == null || !mCmd.Success)
-            {
-                if (!failSilently)
-                {
-                    MessageBar.ShowWarning(TextHelper.GetString("Info.InvalidForQuickBuild"));
-                }
-                return false;
-            }
-
-            // build command
-            string command = mCmd.Groups["params"].Value.Trim();
-            try
-            {
-                command = Regex.Replace(command, "[\\r\\n]\\s*\\*", "", RegexOptions.Singleline);
-                command = " " + MainForm.ProcessArgString(command) + " ";
-                if (command == null || command.Length == 0)
-                {
-                    if (!failSilently)
-                        throw new Exception(TextHelper.GetString("Info.InvalidQuickBuildCommand"));
-                    return false;
-                }
-                outputFile = null;
-                outputFileDetails = "";
-                trustFileWanted = false;
-
-                // get some output information url
-                MatchCollection mPar = re_SplitParams.Matches(command + "-eof");
-                int mPlayIndex = -1;
-                bool noPlay = false;
-                if (mPar.Count > 0)
-                {
-                    string op;
-                    for (int i = 0; i < mPar.Count; i++)
-                    {
-                        op = mPar[i].Groups["switch"].Value;
-                        int start = mPar[i].Index + mPar[i].Length;
-                        int end = (mPar.Count > i + 1) ? mPar[i + 1].Index : start;
-                        if ((op == "-swf") && (outputFile == null) && (mPlayIndex < 0))
-                        {
-                            if (end > start)
-                                outputFile = command.Substring(start, end - start).Trim();
-                        }
-                        else if (op == "-swf-header")
-                        {
-                            if (end > start)
-                            {
-                                string[] dims = command.Substring(start, end - start).Trim().Split(':');
-                                if (dims.Length > 2) outputFileDetails = ";" + dims[0] + ";" + dims[1];
-                            }
-                        }
-                        else if (op == "-play")
-                        {
-                            if (end > start)
-                            {
-                                mPlayIndex = i;
-                                outputFile = command.Substring(start, end - start).Trim();
-                            }
-                        }
-                        else if (op == "-trust")
-                        {
-                            trustFileWanted = true;
-                        }
-                        else if (op == "-noplay")
-                        {
-                            noPlay = true;
-                        }
-                    }
-                }
-                if (outputFile != null && outputFile.Length == 0) outputFile = null;
-
-                // cleaning custom switches
-                if (mPlayIndex >= 0)
-                {
-                    command = command.Substring(0, mPar[mPlayIndex].Index) + command.Substring(mPar[mPlayIndex + 1].Index);
-                }
-                if (trustFileWanted)
-                {
-                    command = command.Replace("-trust", "");
-                }
-                if (noPlay || !settings.PlayAfterBuild)
-                {
-                    command = command.Replace("-noplay", "");
-                    outputFile = null;
-                    runAfterBuild = false;
-                }
-                else runAfterBuild = (outputFile != null);
-            }
-            catch (Exception ex)
-            {
-                ErrorManager.ShowError(ex);
-                return false;
-            }
-
-            // run
-            RunCMD(command);
-            return true;
         }
         #endregion
     }
