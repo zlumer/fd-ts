@@ -37,7 +37,8 @@ namespace TypeScriptContext
             string response = tssProcess.StandardOutput.ReadLine();
             TSSResponse<T> json = JsonConvert.DeserializeObject<TSSResponse<T>>(response);
             if (json.error != null)
-                throw new Exception(json.error);
+                return default(T);
+                //throw new Exception(json.error);
             return json.success;
         }
         private T GetTSSResponse<T>(string command, Dictionary<string, Object> args)

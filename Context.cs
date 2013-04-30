@@ -38,14 +38,10 @@ namespace TypeScriptContext
 
             // language constructs
             features.hasPackages = true;
-            features.hasImports = true;
-            features.hasImportsWildcard = false;
             features.hasClasses = true;
             features.hasExtends = true;
-            features.hasImplements = true;
             features.hasInterfaces = true;
             features.hasEnums = true;
-            features.hasTypeDefs = true;
             features.hasGenerics = true;
             features.hasEcmaTyping = true;
             features.hasVars = true;
@@ -55,6 +51,7 @@ namespace TypeScriptContext
             features.hasTryCatch = true;
             features.hasInference = true;
             features.checkFileName = false;
+            features.hasConciseClasses = true;
 
             // haxe directives
             features.hasDirectives = true;
@@ -70,9 +67,8 @@ namespace TypeScriptContext
             // default declarations access modifiers
             features.classModifierDefault = Visibility.Public;
             features.enumModifierDefault = Visibility.Public;
-            features.typedefModifierDefault = Visibility.Public;
-            features.varModifierDefault = Visibility.Private;
-            features.methodModifierDefault = Visibility.Private;
+            features.varModifierDefault = Visibility.Public;
+            features.methodModifierDefault = Visibility.Public;
 
             // keywords
             features.dot = ".";
@@ -248,6 +244,12 @@ namespace TypeScriptContext
                 TraceManager.AddAsync(ex.Message);
             }
         }
+        protected override ASFileParser GetCodeParser()
+        {
+            var parser = base.GetCodeParser();
+            parser.ScriptMode = true;
+            return parser;
+        }
 
         /// <summary>
         /// Delete current class's cached file
@@ -337,9 +339,9 @@ namespace TypeScriptContext
                 return null;
 
             // auto-started completion, can be ignored for performance (show default completion tooltip)
-            if (expression.Value.IndexOf(".") < 0 || (autoHide && !expression.Value.EndsWith(".")))
+            /*if (expression.Value.IndexOf(".") < 0 || (autoHide && !expression.Value.EndsWith(".")))
                 if (hxsettings.DisableMixedCompletion) return new MemberList();
-                else return null;
+                else return null;*/
 
             // empty expression
             if (expression.Value == "")
@@ -348,7 +350,7 @@ namespace TypeScriptContext
             MemberList list = new MemberList();
 
             TypeScriptCompletion hc = new TypeScriptCompletion(sci, expression.Position, completionModeHandler);
-            TSSCompletionEntry[] al = hc.getList();
+            TSSCompletionEntry[] al = hc.getList(expression.Value.IndexOf(".") >= 0);
             if (al == null || al.Length == 0)
                 return null;
 

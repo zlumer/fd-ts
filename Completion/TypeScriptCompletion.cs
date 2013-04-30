@@ -26,9 +26,9 @@ namespace TypeScriptContext
             comp.Update(new List<string>(sci.Text.Replace("\r\n", "\n").Split('\n')), filename);
         }
 
-        public TSSCompletionEntry[] getList()
+        public TSSCompletionEntry[] getList(bool hasDot)
         {
-            TSSCompletionInfo info = comp.GetCompletions(true, line, pos, filename);
+            TSSCompletionInfo info = comp.GetCompletions(hasDot, line, pos, filename);
             return info.entries;
         }
         public TSSDefinitionResponse getDefinition()
