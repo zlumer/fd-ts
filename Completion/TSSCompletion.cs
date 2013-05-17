@@ -12,9 +12,11 @@ namespace TypeScriptContext
 
         public void Init(string nodePath, string tssPath, string tsSourcePath)
         {
+            tssPath = PluginCore.Helpers.PathHelper.ResolvePath(tssPath);
+
             tssProcess = new Process();
             tssProcess.StartInfo.FileName = nodePath;
-            tssProcess.StartInfo.Arguments = tssPath + " \"" + Path.GetFullPath(tsSourcePath) + "\"";
+            tssProcess.StartInfo.Arguments = "\"" + tssPath + "\" \"" + Path.GetFullPath(tsSourcePath) + "\"";
             tssProcess.StartInfo.UseShellExecute = false;
             tssProcess.StartInfo.RedirectStandardInput = true;
             tssProcess.StartInfo.RedirectStandardOutput = true;
@@ -31,7 +33,7 @@ namespace TypeScriptContext
         private T GetTSSResponse<T>(Dictionary<string, Object> args)
         {
             if (tssProcess.HasExited)
-                throw new Exception("tss process has exited!");
+                throw new Exception("tss process has exited! " + tssProcess.StartInfo.FileName + " " + tssProcess.StartInfo.Arguments);
 
             tssProcess.StandardInput.WriteLine(JsonConvert.SerializeObject(args));
             string response = tssProcess.StandardOutput.ReadLine();
@@ -94,9 +96,12 @@ namespace TypeScriptContext
         }
         public string Reload()
         {
+            if (tssProcess.HasExited)
+                return "";
+            
             return GetTSSResponse<string>("reload", no_args());
         }
-        public void Finish()
+        public void Quit()
         {
             tssProcess.StandardInput.WriteLine(new Dictionary<string, object>() { { "command", "quit" } });
             tssProcess.WaitForExit(3000);

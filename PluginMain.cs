@@ -212,15 +212,16 @@ namespace TypeScriptContext
             }
             else foreach (InstalledSDK sdk in settingObject.InstalledSDKs) ValidateSDK(sdk);
 
-            settingObject.OnClasspathChanged += SettingObjectOnClasspathChanged;
+            settingObject.OnTSSPathChanged += SettingObjectOnTSSPathChanged;
         }
 
         /// <summary>
-        /// Update the classpath if an important setting has changed
+        /// Reload TSS if an important setting has changed
         /// </summary>
-        private void SettingObjectOnClasspathChanged()
+        private void SettingObjectOnTSSPathChanged()
         {
-            if (contextInstance != null) contextInstance.BuildClassPath();
+            if (contextInstance != null)
+                contextInstance.OnTSSPathChange();
         }
 
         /// <summary>

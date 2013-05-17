@@ -28,8 +28,15 @@ namespace TypeScriptContext
 
         public TSSCompletionEntry[] getList(bool hasDot)
         {
-            TSSCompletionInfo info = comp.GetCompletions(hasDot, line, pos, filename);
-            return info.entries;
+            try
+            {
+                TSSCompletionInfo info = comp.GetCompletions(hasDot, line, pos, filename);
+                return info.entries;
+            }
+            catch (System.Exception e)
+            {
+                return null;
+            }
         }
         public TSSDefinitionResponse getDefinition()
         {
@@ -38,8 +45,15 @@ namespace TypeScriptContext
         }
         public string getSymbolType()
         {
-            var s = comp.GetType(line, pos, filename);
-            return s;
+            try
+            {
+                var s = comp.GetType(line, pos, filename);
+                return s;
+            }
+            catch (System.Exception e)
+            {
+                return "any";
+            }
         }
     }
 }

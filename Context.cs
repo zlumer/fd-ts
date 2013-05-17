@@ -323,7 +323,18 @@ namespace TypeScriptContext
         }
         internal void OnFileSwitch()
         {
-            OnFileSwitch(PluginBase.MainForm.CurrentDocument.FileName);
+            var f = PluginBase.MainForm.CurrentDocument.FileName;
+            if (!String.IsNullOrEmpty(f))
+                OnFileSwitch(f);
+        }
+        internal void OnTSSPathChange()
+        {
+            foreach (var h in handlers)
+            {
+                h.Value.Quit();
+            }
+            handlers = null;
+            OnFileSwitch();
         }
 
         /// <summary>

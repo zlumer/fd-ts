@@ -14,13 +14,14 @@ namespace TypeScriptContext
     public class TypeScriptSettings : ASCompletion.Settings.IContextSettings
     {
         [field: NonSerialized]
-        public event ClasspathChangedEvent OnClasspathChanged;
+        public event ClasspathChangedEvent OnTSSPathChanged;
 
         #region IContextSettings Documentation
 
         const string DEFAULT_DOC_COMMAND = "http://www.google.com/search?q=$(ItmTypPkg)+$(ItmTypName)+$(ItmName)+site:http://haxe.org/api";
         protected string documentationCommandLine = DEFAULT_DOC_COMMAND;
 
+        [Browsable(false)]
         [DisplayName("Documentation Command Line")]
         [LocalizedCategory("ASCompletion.Category.Documentation"), LocalizedDescription("ASCompletion.Description.DocumentationCommandLine"), DefaultValue(DEFAULT_DOC_COMMAND)]
         public string DocumentationCommandLine
@@ -77,6 +78,7 @@ namespace TypeScriptContext
             get { return TextHelper.GetString("Info.HaXeDone"); }
         }
 
+        [Browsable(false)]
         [DisplayName("Check Syntax On Save")]
         [LocalizedCategory("ASCompletion.Category.Common"), LocalizedDescription("ASCompletion.Description.CheckSyntaxOnSave"), DefaultValue(DEFAULT_CHECKSYNTAX)]
         public bool CheckSyntaxOnSave
@@ -85,6 +87,7 @@ namespace TypeScriptContext
             set { checkSyntaxOnSave = value; }
         }
 
+        [Browsable(false)]
         [DisplayName("User Classpath")]
         [LocalizedCategory("ASCompletion.Category.Common"), LocalizedDescription("ASCompletion.Description.UserClasspath")]
         public string[] UserClasspath
@@ -97,6 +100,7 @@ namespace TypeScriptContext
             }
         }
 
+        [Browsable(false)]
         [DisplayName("Installed Haxe SDKs")]
         [LocalizedCategory("ASCompletion.Category.Language"), LocalizedDescription("HaXeContext.Description.HaXePath")]
         public InstalledSDK[] InstalledSDKs
@@ -109,6 +113,7 @@ namespace TypeScriptContext
             }
         }
 
+        [Browsable(false)]
         public InstalledSDK GetDefaultSDK()
         {
             if (installedSDKs == null || installedSDKs.Length == 0)
@@ -119,6 +124,7 @@ namespace TypeScriptContext
             return InstalledSDK.INVALID_SDK;
         }
 
+        [Browsable(false)]
         [DisplayName("Enable Completion")]
         [LocalizedCategory("ASCompletion.Category.Common"), LocalizedDescription("ASCompletion.Description.CompletionEnabled"), DefaultValue(DEFAULT_COMPLETIONENABLED)]
         public bool CompletionEnabled
@@ -127,6 +133,7 @@ namespace TypeScriptContext
             set { completionEnabled = value; }
         }
 
+        [Browsable(false)]
         [DisplayName("Generate Imports")]
         [LocalizedCategory("ASCompletion.Category.Common"), LocalizedDescription("ASCompletion.Description.GenerateImports"), DefaultValue(DEFAULT_GENERATEIMPORTS)]
         public bool GenerateImports
@@ -138,6 +145,7 @@ namespace TypeScriptContext
         /// <summary>
         /// In completion, show all known types in project
         /// </summary>
+        [Browsable(false)]
         [DisplayName("List All Types In Completion")]
         [LocalizedCategory("ASCompletion.Category.Common"), LocalizedDescription("ASCompletion.Description.CompletionListAllTypes"), DefaultValue(DEFAULT_LISTALL)]
         public bool CompletionListAllTypes
@@ -149,6 +157,7 @@ namespace TypeScriptContext
         /// <summary>
         /// In completion, show qualified type names (package + type)
         /// </summary>
+        [Browsable(false)]
         [DisplayName("Show QualifiedTypes In Completion")]
         [LocalizedCategory("ASCompletion.Category.Common"), LocalizedDescription("ASCompletion.Description.CompletionShowQualifiedTypes"), DefaultValue(DEFAULT_QUALIFY)]
         public bool CompletionShowQualifiedTypes
@@ -160,6 +169,7 @@ namespace TypeScriptContext
         /// <summary>
         /// Defines if each classpath is explored immediately (PathExplorer) 
         /// </summary>
+        [Browsable(false)]
         [DisplayName("Lazy Classpath Exploration")]
         [LocalizedCategory("ASCompletion.Category.Common"), LocalizedDescription("ASCompletion.Description.LazyClasspathExploration"), DefaultValue(DEFAULT_LAZYMODE)]
         public bool LazyClasspathExploration
@@ -168,6 +178,7 @@ namespace TypeScriptContext
             set { lazyClasspathExploration = value; }
         }
 
+        [Browsable(false)]
         [DisplayName("Play After Build")]
         [LocalizedCategory("ASCompletion.Category.Common"), LocalizedDescription("ASCompletion.Description.PlayAfterBuild"), DefaultValue(DEFAULT_PLAY)]
         public bool PlayAfterBuild
@@ -176,6 +187,7 @@ namespace TypeScriptContext
             set { playAfterBuild = value; }
         }
 
+        [Browsable(false)]
         [DisplayName("Fix Package Automatically")]
         [LocalizedCategory("ASCompletion.Category.Common"), LocalizedDescription("ASCompletion.Description.FixPackageAutomatically"), DefaultValue(DEFAULT_FIXPACKAGEAUTOMATICALLY)]
         public bool FixPackageAutomatically
@@ -188,7 +200,7 @@ namespace TypeScriptContext
 
         #region TypeScript specific members
 
-        const string DEFAULT_TSS_PATH = "";
+        const string DEFAULT_TSS_PATH = @"Tools\tstools\tss.js";
         const string DEFAULT_NODE_PATH = "node.exe";
 
         const bool DEFAULT_DISABLEMIXEDCOMPLETION = false;
@@ -206,7 +218,11 @@ namespace TypeScriptContext
         public string TSSPath
         {
             get { return tssPath; }
-            set { tssPath = value; }
+            set
+            {
+                tssPath = value;
+                FireChanged();
+            }
         }
         [DisplayName("Node.js Path")]
         [LocalizedCategory("ASCompletion.Category.Language"), LocalizedDescription("TypeScriptContext.Description.NodePath"), DefaultValue(DEFAULT_NODE_PATH)]
@@ -217,6 +233,7 @@ namespace TypeScriptContext
             set { nodePath = value; }
         }
 
+        [Browsable(false)]
         [DisplayName("Disable Mixed Completion")]
         [LocalizedCategory("ASCompletion.Category.Language"), LocalizedDescription("HaXeContext.Description.DisableMixedCompletion"), DefaultValue(DEFAULT_DISABLEMIXEDCOMPLETION)]
         public bool DisableMixedCompletion
@@ -226,6 +243,7 @@ namespace TypeScriptContext
         }
 
         [DisplayName("Disable Completion On Demand")]
+        [Browsable(false)]
         [LocalizedCategory("ASCompletion.Category.Language"), LocalizedDescription("HaXeContext.Description.DisableCompletionOnDemand"), DefaultValue(DEFAULT_DISABLECOMPLETIONONDEMAND)]
         public bool DisableCompletionOnDemand
         {
@@ -238,7 +256,7 @@ namespace TypeScriptContext
         [Browsable(false)]
         private void FireChanged()
         {
-            if (OnClasspathChanged != null) OnClasspathChanged();
+            if (OnTSSPathChanged != null) OnTSSPathChanged();
         }
     }
 }
