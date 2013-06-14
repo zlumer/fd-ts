@@ -68,9 +68,9 @@ namespace TypeScriptContext
             Dictionary<string, Object> args = new Dictionary<string, object>() { { "member", isMember } };
             return GetTSSResponse<TSSCompletionInfo>("completions", fileName, line, pos, args);
         }
-        public string GetType(int line, int pos, string fileName)
+        public TSSTypeInfo GetType(int line, int pos, string fileName)
         {
-            return GetTSSResponse<string>("type", fileName, line, pos, no_args());
+            return GetTSSResponse<TSSTypeInfo>("type", fileName, line, pos, no_args());
         }
         public string GetSymbol(int line, int pos, string fileName)
         {
@@ -111,6 +111,11 @@ namespace TypeScriptContext
     {
         public T success;
         public string error;
+    }
+    class TSSTypeInfo
+    {
+        public string type;
+        public string docComment;
     }
     class TSSCompletionInfo
     {

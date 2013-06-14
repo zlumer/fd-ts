@@ -48,7 +48,7 @@ namespace TypeScriptContext
             try
             {
                 var s = comp.GetType(line, pos, filename);
-                return s;
+                return s.type;
             }
             catch (System.Exception e)
             {
