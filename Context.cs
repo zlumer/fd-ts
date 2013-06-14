@@ -416,6 +416,9 @@ namespace TypeScriptContext
         }
         private void populateFunctionMemberModel(MemberModel member, string type)
         {
+            var re = new Regex("\\(\\+\\s*(\\d*)\\s*overload\\(s\\)\\)");
+            type = re.Replace(type, "");
+
             member.Type = type.Substring(type.LastIndexOf("=>") + "=>".Length).Trim();
             var start = type.IndexOf("(");
             var end = type.LastIndexOf(")");
@@ -476,7 +479,8 @@ namespace TypeScriptContext
             }
             else
             {
-                populateFunctionMemberModel(member, t);
+                if (!String.IsNullOrEmpty(t))
+                    populateFunctionMemberModel(member, t);
             }
             
             return member;
