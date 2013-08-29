@@ -324,7 +324,7 @@ namespace TypeScriptContext
         internal void OnFileSwitch()
         {
             var f = PluginBase.MainForm.CurrentDocument.FileName;
-            if (!String.IsNullOrEmpty(f))
+            if (!String.IsNullOrEmpty(f) && !f.Contains("[model]"))
                 OnFileSwitch(f);
         }
         internal void OnTSSPathChange()
