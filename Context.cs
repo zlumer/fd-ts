@@ -311,15 +311,22 @@ namespace TypeScriptContext
         /// </summary>
         internal void OnFileSwitch(string filename)
         {
-            if (handlers == null)
-                handlers = new Dictionary<string, TSSCompletion>();
-
-            if (!handlers.ContainsKey(filename))
+            if (filename.EndsWith("ts"))
             {
-                handlers[filename] = new TSSCompletion();
-                handlers[filename].Init(hxsettings.NodePath, hxsettings.TSSPath, filename);
+                if (handlers == null)
+                    handlers = new Dictionary<string, TSSCompletion>();
+
+                if (!handlers.ContainsKey(filename))
+                {
+                    handlers[filename] = new TSSCompletion();
+                    handlers[filename].Init(hxsettings.NodePath, hxsettings.TSSPath, filename);
+                }
+                completionModeHandler = handlers[filename];
             }
-            completionModeHandler = handlers[filename];
+            else
+            {
+                completionModeHandler = null;
+            }
         }
         internal void OnFileSwitch()
         {
@@ -346,6 +353,9 @@ namespace TypeScriptContext
         /// <returns>Null (not handled) or member list</returns>
         public override MemberList ResolveDotContext(ScintillaNet.ScintillaControl sci, ASExpr expression, bool autoHide)
         {
+            if (completionModeHandler == null)
+                return null;
+
             if (autoHide && !hxsettings.DisableCompletionOnDemand)
                 return null;
 
@@ -447,6 +457,9 @@ namespace TypeScriptContext
         /// <returns>Null (not handled) or function signature</returns>
         public override MemberModel ResolveFunctionContext(ScintillaNet.ScintillaControl sci, ASExpr expression, bool autoHide)
         {
+            if (completionModeHandler == null)
+                return null;
+
             if (autoHide && !hxsettings.DisableCompletionOnDemand)
                 return null;
 

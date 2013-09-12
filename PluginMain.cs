@@ -146,7 +146,8 @@ namespace TypeScriptContext
                         contextInstance.OnFileSwitch(te.Value);
                     break;
                 case EventType.FileSave:
-                    contextInstance.completionModeHandler.Reload();
+                    if (contextInstance.completionModeHandler != null)
+                        contextInstance.completionModeHandler.Reload();
                     break;
             }
         }
