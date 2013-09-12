@@ -51,7 +51,6 @@ namespace TypeScriptContext
             features.hasTryCatch = true;
             features.hasInference = true;
             features.checkFileName = false;
-            features.hasConciseClasses = true;
 
             // haxe directives
             features.hasDirectives = true;
